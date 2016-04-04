@@ -2,15 +2,16 @@
 ## functions do
 
 ## Write a short comment describing this function
-## function makeCacheMatrix
-##
+## Function makeCacheMatrix
 ##    arg: x class(x)= "matrix" (default: empty matrix())
-##
 ##    return a list with the following entries  
 ##         $get()          : function returns matrix x
 ##         $set(new_x)     : function set x to new_x and x_inv to NULL
 ##         $getinv         : function returns x_inv if computed NULL otherwise 
-##         $setinv(new_inv): function set x_inv to new_inv 
+##         $setinv(new_inv): function set x_inv to new_inv
+##    Basically that is exactly makevector with x being a matrix by default 
+##       and the environemnt setmean and getmean renamed 
+##    Added a few checks
 makeCacheMatrix <- function(x = matrix()) {
     # x & x_inv exist only in make CacheMatrix environement
     x_inv <- NULL
@@ -38,17 +39,17 @@ makeCacheMatrix <- function(x = matrix()) {
 }
 
 ## Write a short comment describing this function
-## cacheSolve:
+## Function cacheSolve:
+##    arg: xl (class(xl="list"))
+##         (Note: must have be created using makeCacheMatrix)
 ##
-##    Arg 1: xl (class(xl="list"))
-##           xl must have be created using makeCacheMatrix
-##
-##    Returns the inverse of the xl$get()
-##          if the inverse of matrix xl$get() was already computed
-##            the result is taken form xl
-##          otherwise:
-##            if the matrix has bad dimensions or na save and return a matrix of NA
-##            if the matrix has good dimensions save and return the inverse
+##    Returns
+##         NULL: if the matrix has bad dimensions
+##         matrix(...,dim(x)) the inverse of x:
+##          if the inverse of x was already computed, the result is taken form xl
+##          is computed and saved in xl otherwise
+##    Basically that is exactly cachemean with 'mean' replaced by 'solve'
+##    Added a few checks change argument name for visibility
 cacheSolve <- function(xl, ...) {
     ## Return a matrix that is the inverse of 'x'
     invx <- xl$getinv()
@@ -65,7 +66,9 @@ cacheSolve <- function(xl, ...) {
     # if yes I run solve 
     if(checkMatrix(xmat)){
         # matrix is good enough to inverse it
-        invx <- solve(xmat)
+        # if I did this correctly, when solve is applyed to the matrix
+        # an error message would appear only if the entry cannot be inverted
+        invx <- solve(xmat,...)
         # save invx into list xl
         xl$setinv(invx)
     } else {
@@ -80,12 +83,10 @@ cacheSolve <- function(xl, ...) {
     invx
 }
 
-# checkMatrix:
-#    arg: x class(x)= "matrix" (default: empty matrix())
-# return TRUE if the argument is a square matrix of dim > c(0,0) with no NA
-# return FALSE otherwise
-# if I did this corrctly, when solve is applyed to the matrix
-# an error message would appear only if the entry cannot be inverted
+## Function checkMatrix:
+##    arg: x class(x)= "matrix" (default: empty matrix())
+##    return TRUE if the argument is a square matrix of dim > c(0,0) with no NA
+##    return FALSE otherwise
 checkMatrix <- function(x=matrix()){
     # check class of the argument
     if(class(x)!="matrix"){
